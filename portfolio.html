@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DigitalFreezeFrame | Photo & Video Portfolio</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --bg-alt:#141414;
+    --text:#f5f5f5;
+    --muted:#9a9a9a;
+    --accent:#e0e0e0;
+    --border:#262626;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    line-height:1.6;
+  }
+
+  /* Header */
+  header{
+    position:fixed;
+    top:0; left:0; right:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:24px 48px;
+    z-index:100;
+    background:linear-gradient(to bottom, rgba(10,10,10,0.85), rgba(10,10,10,0));
+    backdrop-filter:blur(4px);
+  }
+  .logo{
+    font-size:1.3rem;
+    font-weight:700;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--text);
+    text-decoration:none;
+  }
+  nav ul{
+    list-style:none;
+    display:flex;
+    gap:36px;
+  }
+  nav a{
+    color:var(--text);
+    text-decoration:none;
+    font-size:0.85rem;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    transition:color .2s ease;
+  }
+  nav a:hover{color:var(--muted);}
+  .nav-toggle{display:none;}
+
+  /* Hero */
+  .hero{
+    position:relative;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    overflow:hidden;
+  }
+  .hero video, .hero img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    filter:brightness(0.55);
+  }
+  .hero iframe.hero-video{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    filter:brightness(0.55);
+    border:0;
+    pointer-events:none;
+  }
+  .hero-content{
+    position:relative;
+    z-index:2;
+  }
+  .hero-content h1{
+    font-size:clamp(2.5rem, 8vw, 5.5rem);
+    font-weight:700;
+    letter-spacing:6px;
+    text-transform:uppercase;
+  }
+  .hero-content p{
+    margin-top:18px;
+    font-size:1.1rem;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .scroll-cue{
+    position:absolute;
+    bottom:36px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:0.75rem;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--muted);
+    z-index:2;
+  }
+
+  /* Sections */
+  section{
+    padding:100px 48px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+  .section-header{
+    text-align:center;
+    margin-bottom:60px;
+  }
+  .section-header h2{
+    font-size:clamp(1.8rem, 4vw, 3rem);
+    letter-spacing:6px;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .section-header span{
+    display:block;
+    margin-top:10px;
+    color:var(--muted);
+    font-size:0.85rem;
+    letter-spacing:3px;
+    text-transform:uppercase;
+  }
+
+  /* Gallery grid */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));
+    gap:24px;
+  }
+  .grid-item{
+    position:relative;
+    overflow:hidden;
+    aspect-ratio:4/3;
+    background:var(--bg-alt);
+    border:1px solid var(--border);
+  }
+  .grid-item.portrait{
+    aspect-ratio:2/3;
+  }
+  .grid-item.vertical{
+    aspect-ratio:9/16;
+    width:100%;
+    max-width:380px;
+    margin:0 auto;
+  }
+  .grid-item iframe{
+    width:100%;
+    height:100%;
+    display:block;
+    border:0;
+  }
+  .grid-item img, .grid-item video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    transition:transform .6s ease, filter .6s ease;
+  }
+  .grid-item:hover img, .grid-item:hover video{
+    transform:scale(1.06);
+    filter:brightness(0.6);
+  }
+  .grid-item .caption{
+    position:absolute;
+    bottom:0; left:0; right:0;
+    padding:18px 20px;
+    background:linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .grid-item:hover .caption{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .caption h3{
+    font-size:1rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+  }
+  .caption p{
+    color:var(--muted);
+    font-size:0.8rem;
+    margin-top:4px;
+  }
+  .play-icon{
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:54px; height:54px;
+    border:1px solid rgba(255,255,255,0.6);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+    z-index:2;
+    transition:transform .3s ease, opacity .5s ease;
+  }
+  .grid-item:hover .play-icon{transform:translate(-50%,-50%) scale(1.1);}
+  .play-icon::after{
+    content:"";
+    border-style:solid;
+    border-width:8px 0 8px 14px;
+    border-color:transparent transparent transparent #fff;
+    margin-left:4px;
+  }
+
+  /* Click/hover-to-play video embeds */
+  .video-embed{cursor:pointer;}
+  .video-embed .video-poster{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    position:relative;
+    z-index:1;
+    opacity:1;
+    transition:opacity .5s ease;
+  }
+  .video-embed iframe{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border:0;
+  }
+  .video-embed.loaded .video-poster,
+  .video-embed.loaded .play-icon{
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* About */
+  .about{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:60px;
+    align-items:center;
+  }
+  .about img{
+    width:100%;
+    aspect-ratio:4/5;
+    object-fit:cover;
+    border:1px solid var(--border);
+  }
+  .about-text p{
+    color:var(--muted);
+    margin-bottom:18px;
+    font-size:0.95rem;
+  }
+  .about-text h2{
+    font-size:clamp(1.8rem, 4vw, 2.6rem);
+    letter-spacing:4px;
+    text-transform:uppercase;
+    margin-bottom:24px;
+    color:var(--text);
+  }
+
+  /* Contact */
+  .contact{
+    text-align:center;
+  }
+  .contact h2{
+    font-size:clamp(1.8rem, 5vw, 3.2rem);
+    letter-spacing:5px;
+    text-transform:uppercase;
+    font-weight:700;
+  }
+  .contact p{
+    color:var(--muted);
+    margin:18px auto 32px;
+    max-width:520px;
+  }
+  .btn{
+    display:inline-block;
+    padding:16px 42px;
+    border:1px solid var(--text);
+    color:var(--text);
+    text-decoration:none;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    font-size:0.85rem;
+    transition:background .25s ease, color .25s ease;
+  }
+  .btn:hover{
+    background:var(--text);
+    color:var(--bg);
+  }
+
+  .social-icons{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+    margin-top:36px;
+  }
+  .social-icons a{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:48px;
+    height:48px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    color:var(--text);
+    transition:border-color .25s ease, color .25s ease, transform .25s ease;
+  }
+  .social-icons a:hover{
+    transform:translateY(-3px);
+  }
+  .social-icons a svg{
+    width:22px;
+    height:22px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+  .social-icons a.instagram:hover{color:#7ee787; border-color:#7ee787;}
+  .social-icons a.messaging:hover{color:#f5a35c; border-color:#f5a35c;}
+  .social-icons a.email:hover{color:#6fa8f5; border-color:#6fa8f5;}
+  .social-icons a.facebook:hover{color:#5b8def; border-color:#5b8def;}
+  .social-icons a.dot{
+    background:#1ec76a;
+    border-color:#1ec76a;
+    color:#0a0a0a;
+  }
+  .social-icons a.dot svg{
+    fill:currentColor;
+    stroke:none;
+  }
+  .social-icons a.dot:hover{
+    background:transparent;
+    color:#1ec76a;
+  }
+
+  footer{
+    padding:32px 48px;
+    text-align:center;
+    border-top:1px solid var(--border);
+    color:var(--muted);
+    font-size:0.8rem;
+    letter-spacing:2px;
+  }
+
+  @media (max-width:768px){
+    header{padding:18px 24px;}
+    nav ul{
+      position:fixed;
+      top:0; right:-260px;
+      width:240px;
+      height:100vh;
+      background:var(--bg-alt);
+      flex-direction:column;
+      padding:100px 32px;
+      gap:28px;
+      transition:right .3s ease;
+      border-left:1px solid var(--border);
+    }
+    nav ul.open{right:0;}
+    .nav-toggle{
+      display:block;
+      background:none;
+      border:none;
+      color:var(--text);
+      font-size:1.5rem;
+      cursor:pointer;
+      z-index:101;
+    }
+    section{padding:70px 24px;}
+    .about{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#" class="logo">DigitalFreezeFrame</a>
+  <nav>
+    <ul id="navList">
+      <li><a href="#photography">Photography</a></li>
+      <li><a href="#video">Video</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+  <button class="nav-toggle" id="navToggle">&#9776;</button>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <iframe class="hero-video" src="https://player.vimeo.com/video/1200467584?background=1&amp;autoplay=1&amp;loop=1&amp;muted=1&amp;autopause=0&amp;app_id=58479" allow="autoplay; fullscreen; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" title="rally_car_hero"></iframe>
+  <div class="hero-content">
+    <h1>DigitalFreezeFrame</h1>
+    <p>Photography &amp; Videography</p>
+  </div>
+  <div class="scroll-cue">Scroll</div>
+</section>
+
+<!-- Photography -->
+<section id="photography">
+  <div class="section-header">
+    <h2>Photography</h2>
+    <span>Selected Work</span>
+  </div>
+  <div class="grid">
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/fy3c7zl5wg8srphamnss.jpg" alt="Porsche 911 at Cars and Coffee">
+      <div class="caption">
+        <h3>Morning Arrival</h3>
+        <p>Porsche 911 &mdash; Cars &amp; Coffee</p>
+      </div>
+    </div>
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/eet39pe5kcnxyfalm9gs.jpg" alt="Porsche 911 hood detail">
+      <div class="caption">
+        <h3>GTS Stripes</h3>
+        <p>Porsche 911 &mdash; Detail Shot</p>
+      </div>
+    </div>
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/zyuqrol2rhe3jhcoqzdw.jpg" alt="Ferrari wheel and brake caliper">
+      <div class="caption">
+        <h3>Yellow Calipers</h3>
+        <p>Ferrari &mdash; Wheel Detail</p>
+      </div>
+    </div>
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/uw4ihrtn0cijit9goidx.jpg" alt="Ferrari front hood in the rain">
+      <div class="caption">
+        <h3>Rain on Black</h3>
+        <p>Ferrari &mdash; Front Detail</p>
+      </div>
+    </div>
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/onv4gbxo8lghgbrwtckw.jpg" alt="Ram TRX truck">
+      <div class="caption">
+        <h3>Warlord 6x6</h3>
+        <p>Ram TRX &mdash; Cars &amp; Coffee</p>
+      </div>
+    </div>
+    <div class="grid-item portrait">
+      <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/cl1ttpbvtvu1mkzhebam.jpg" alt="Toyota 86 with heart-shaped headlight">
+      <div class="caption">
+        <h3>Heart Headlight</h3>
+        <p>Toyota 86 &mdash; Detail Shot</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Video -->
+<section id="video">
+  <div class="section-header">
+    <h2>Video</h2>
+    <span>Motion Work</span>
+  </div>
+  <div class="grid">
+    <div class="grid-item vertical video-embed" data-video-id="1200467584">
+      <img class="video-poster" src="https://i.vimeocdn.com/video/2167562575-2822968077ab23f54d706b2cbf4bc87fefca84efcf7b344586914e4f068e7ad3-d_640x1138.jpg?region=us" alt="Rally Car video preview">
+      <div class="caption">
+        <h3>Rally Car &mdash; Cars &amp; Coffee</h3>
+        <p>Automotive Highlight</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="about">
+    <img src="https://res.cloudinary.com/dzbmna1xj/image/upload/f_auto,q_auto/car-portfolio/zyuqrol2rhe3jhcoqzdw.jpg" alt="Micah Brewer">
+    <div class="about-text">
+      <h2>About</h2>
+      <p>I'm Micah Brewer, a photographer and videographer focused on capturing cars and the culture around them with a clean, cinematic style.</p>
+      <p>From Cars &amp; Coffee meetups to rally car highlight reels, every project is shot and edited to tell a story &mdash; not just show a moment.</p>
+      <p>Available for event coverage, brand video, and photo/video editing collaborations.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="contact" id="contact">
+  <h2>Get In Touch</h2>
+  <p>Have a project in mind? Let's talk about how we can bring it to life through photo and video.</p>
+  <a class="btn" href="mailto:digitalfreezeframe@gmail.com">Contact Me</a>
+
+  <div class="social-icons">
+    <a class="instagram" href="https://www.instagram.com/digitalfreezeframe/" target="_blank" rel="noopener" aria-label="Instagram">
+      <svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" stroke="none"/></svg>
+    </a>
+    <a class="facebook" href="https://www.facebook.com/micah.brewer.373849" target="_blank" rel="noopener" aria-label="Facebook">
+      <svg viewBox="0 0 24 24"><path d="M15.5 8.5h-2a1.5 1.5 0 0 0-1.5 1.5v2h3.5l-.5 3H12v7H9v-7H7v-3h2v-2.3C9 7.3 10.5 5.5 13 5.5h2.5z"/></svg>
+    </a>
+    <a class="messaging" href="sms:+14058198689" aria-label="Text Message">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5a8 8 0 0 1-8 8c-1.4 0-2.7-.3-3.9-.9L3 20l1.4-4.1A8 8 0 1 1 21 11.5z"/></svg>
+    </a>
+    <a class="email" href="mailto:digitalfreezeframe@gmail.com" aria-label="Email">
+      <svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M3 6.5l9 6.5 9-6.5"/></svg>
+    </a>
+    <a class="dot" href="https://dot.cards/digitalfreezeframe?s=s" target="_blank" rel="noopener" aria-label="Dot Card">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 DigitalFreezeFrame. All rights reserved.
+</footer>
+
+<script>
+  const toggle = document.getElementById('navToggle');
+  const navList = document.getElementById('navList');
+  toggle.addEventListener('click', () => navList.classList.toggle('open'));
+  navList.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navList.classList.remove('open')));
+
+  const heroVideo = document.querySelector('.hero-video');
+  const hero = document.querySelector('.hero');
+  const videoAR = 9 / 16;
+  function resizeHeroVideo(){
+    const w = hero.offsetWidth;
+    const h = hero.offsetHeight;
+    if (w / h > videoAR) {
+      heroVideo.style.width = w + 'px';
+      heroVideo.style.height = (w / videoAR) + 'px';
+    } else {
+      heroVideo.style.height = h + 'px';
+      heroVideo.style.width = (h * videoAR) + 'px';
+    }
+  }
+  resizeHeroVideo();
+  window.addEventListener('resize', resizeHeroVideo);
+
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  let vimeoSdkPromise = null;
+  function loadVimeoSdk(){
+    if (window.Vimeo) return Promise.resolve();
+    if (!vimeoSdkPromise) {
+      vimeoSdkPromise = new Promise(resolve => {
+        const script = document.createElement('script');
+        script.src = 'https://player.vimeo.com/api/player.js';
+        script.onload = resolve;
+        document.head.appendChild(script);
+      });
+    }
+    return vimeoSdkPromise;
+  }
+
+  function loadVideo(el, autoplaySound){
+    if (el.querySelector('iframe')) return;
+    const id = el.dataset.videoId;
+    const params = autoplaySound
+      ? `autoplay=1&loop=1&title=0&byline=0&portrait=0&badge=0&autopause=0&player_id=0&app_id=58479`
+      : `autoplay=1&loop=1&background=1&autopause=0&app_id=58479`;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://player.vimeo.com/video/${id}?${params}`;
+    iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+    iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+    el.appendChild(iframe);
+    el.classList.add('playing');
+
+    loadVimeoSdk().then(() => {
+      if (!el.contains(iframe)) return;
+      const player = new Vimeo.Player(iframe);
+      player.on('play', () => el.classList.add('loaded'));
+    });
+  }
+
+  function unloadVideo(el){
+    const iframe = el.querySelector('iframe');
+    if (iframe) iframe.remove();
+    el.classList.remove('playing', 'loaded');
+  }
+
+  document.querySelectorAll('.video-embed').forEach(el => {
+    if (canHover) {
+      el.addEventListener('mouseenter', () => loadVideo(el, false));
+      el.addEventListener('mouseleave', () => unloadVideo(el));
+    } else {
+      el.addEventListener('click', () => loadVideo(el, true));
+    }
+  });
+</script>
+
+</body>
+</html>
